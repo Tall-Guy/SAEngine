@@ -19,6 +19,22 @@ namespace Editor
         public MainWindow()
         {
             InitializeComponent();
+            CreateProjectGrid_ToggleVisibility(false);
+        }
+
+        private void CreateProjectBtn_onClick(object sender, RoutedEventArgs e)
+        {
+            CreateProjectGrid_ToggleVisibility(true);
+        }
+
+        private void CreateProjectGrid_ToggleVisibility(bool on)
+        {
+            CreateProjectGrid.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private void CreateProjectGrid_CancelBtn_onClick(object sender, RoutedEventArgs e)
+        {
+            CreateProjectGrid_ToggleVisibility(false);
         }
     }
 }

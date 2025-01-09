@@ -5,8 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Editor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="SAEngine Editor" Height="450" Width="800" Background="Black">
     <Grid>
+        <Button x:Name="CreateProjectBtn" Content="Create Project" HorizontalAlignment="Left" Margin="21,29,0,0" VerticalAlignment="Top" Width="268" Height="28" Click="CreateProjectBtn_onClick"/>
+        <Button x:Name="LoadProjectBtn" Content="Load Project" HorizontalAlignment="Left" Margin="21,87,0,0" VerticalAlignment="Top" Width="268" Height="29"/>
+        <Image  HorizontalAlignment="Left" Margin="21,360,0,0" VerticalAlignment="Top" Width="268" Height="56" Source="/SAE-LOGO_CREAT-MEDIA-EDU_WHITE_web.png" Stretch="Fill"/>
+        <GridSplitter HorizontalAlignment="Left" Height="100" Margin="325,182,0,0" VerticalAlignment="Top" Width="5"/>
+        <Grid x:Name="CreateProjectGrid" Margin="330,0,0,0">
+            <Label Content="Name" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" Width="99" Foreground="White"/>
+            <TextBox x:Name="NameTxtBox" HorizontalAlignment="Left" Margin="60,28,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="400" Height="23"/>
+            <Label Content="Path" HorizontalAlignment="Left" Margin="10,56,0,0" VerticalAlignment="Top" Width="99" Foreground="White"/>
+            <TextBox x:Name="PathTxtBox" HorizontalAlignment="Left" Margin="60,60,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="330" Height="21"/>
+            <Button x:Name="BrowseBtn" Content="Browse" HorizontalAlignment="Left" Margin="395,58,0,0" VerticalAlignment="Top" Width="65" Height="24" Click="BrowseBtn_Click"/>
+            <Button x:Name="CreateBtn" Content="Create" HorizontalAlignment="Left" Margin="127,140,0,0" VerticalAlignment="Top" Width="98"/>
+            <Button x:Name="CancelBtn" Content="Cancel" HorizontalAlignment="Left" Margin="276,140,0,0" VerticalAlignment="Top" Width="98" Click="CreateProjectGrid_CancelBtn_onClick"/>
+            <Label Content="Settings" HorizontalAlignment="Left" Margin="10,86,0,0" VerticalAlignment="Top" Width="99" Foreground="White"/>
+        </Grid>
 
     </Grid>
 </Window>
