@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <BaseOutputPath>..\x64\Debug\</BaseOutputPath>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
 </Project>
