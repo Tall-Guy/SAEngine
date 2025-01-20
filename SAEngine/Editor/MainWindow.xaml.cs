@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,17 +25,18 @@ namespace Editor
             InitializeComponent();
             CreateProjectGrid_ToggleVisibility(false);
             PathTxtBox.IsReadOnly = true;
+            SetNameError(false);
+            SetCreateError(false);
         }
+
+        bool nameError;
+        bool createError;
 
         private void CreateProjectBtn_onClick(object sender, RoutedEventArgs e)
         {
             CreateProjectGrid_ToggleVisibility(true);
         }
 
-        private void CreateProjectGrid_ToggleVisibility(bool on)
-        {
-            CreateProjectGrid.Visibility = on ? Visibility.Visible : Visibility.Hidden;
-        }
 
         private void CreateProjectGrid_CancelBtn_onClick(object sender, RoutedEventArgs e)
         {
@@ -52,6 +54,7 @@ namespace Editor
             parentFolder = res;
 
             PathTxtBox.Text = parentFolder;
+            CheckIfProjectPathExists();
         }
 
         private string? GetFolderFromDialog()
@@ -73,8 +76,9 @@ namespace Editor
         /// To create a folder with this name inside the <see cref="parentFolder"/>
         /// </summary>
         string projectName = "";
-
         string parentFolder = "";
+        // Commbine 
+        string projectPath => System.IO.Path.Combine(parentFolder, projectName);
 
         private void NameTxtBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -83,19 +87,70 @@ namespace Editor
             {
                 projectName = textBox.Text;
             }
+
+            bool needsError = !IsValidFolderName(projectName);
+            SetNameError(needsError);
+            CheckIfProjectPathExists();
+        }
+
+        private void CheckIfProjectPathExists()
+        {
+            bool showProjectError = Directory.Exists(projectPath);
+            SetCreateError(showProjectError);
+        }
+
+        // 2024 says sorry for multiple functions doing the same thing ^_^
+        private void SetCreateError(bool on)
+        {
+            createError = on;
+            CreateErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+
+            ValidateCreateBtn();
+        }
+
+        private void SetNameError(bool on)
+        {
+            nameError = on;
+            NameErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+
+            ValidateCreateBtn();
+        }
+
+        private void ValidateCreateBtn()
+        {
+            bool hasErrors = nameError || createError;
+            bool hasPath = projectName != "" && parentFolder != "";
+
+            CreateBtn.IsEnabled = !hasErrors && hasPath;
+        }
+
+        private void CreateProjectGrid_ToggleVisibility(bool on)
+        {
+            CreateProjectGrid.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        private bool IsValidFolderName(string projectName)
+        {
+            char[] invalidFileNameChars = System.IO.Path.GetInvalidFileNameChars();
+            char[] invalidPathChars = System.IO.Path.GetInvalidPathChars();
+            foreach (char c in projectName)
+                if (invalidFileNameChars.Contains(c) || invalidPathChars.Contains(c))
+                    return false;
+
+            return true;
         }
 
         private void PathTxtBox_TextChanged(object sender, TextChangedEventArgs e) { }
 
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
         {
-            // Commbine 
-            string projectPath = System.IO.Path.Combine(parentFolder, projectName);
-
             // Create (check?)
             DirectoryInfo directoryInfo = Directory.CreateDirectory(projectPath);
 
+            // TODO: Create any necessary files
+
             // All done?
+            throw new NotImplementedException("TODO: IMPLEMENT TRANSITION TO VIEWPORT!");
         }
     }
 }
