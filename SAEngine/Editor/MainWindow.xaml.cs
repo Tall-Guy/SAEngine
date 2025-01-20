@@ -36,5 +36,10 @@ namespace Editor
         {
             CreateProjectGrid_ToggleVisibility(false);
         }
+
+        private void BrowseBtn_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
