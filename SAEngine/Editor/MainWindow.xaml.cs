@@ -148,6 +148,13 @@ namespace Editor
             DirectoryInfo directoryInfo = Directory.CreateDirectory(projectPath);
 
             // TODO: Create any necessary files
+            string fullPathToParentFolder = directoryInfo.FullName;
+            string fileName = "";
+            string fileExtension = "sae";
+            string fullFileName = fileName + "." + fileExtension;
+            string fullPathToFile = System.IO.Path.Combine(fullPathToParentFolder, fullFileName);
+
+            FileStream fs = File.Create(fullPathToFile);
 
             // All done?
             throw new NotImplementedException("TODO: IMPLEMENT TRANSITION TO VIEWPORT!");
