@@ -23,27 +23,54 @@ namespace Editor
         public MainWindow()
         {
             InitializeComponent();
-            CreateProjectGrid_ToggleVisibility(false);
-            PathTxtBox.IsReadOnly = true;
-            SetNameError(false);
-            SetCreateError(false);
+            Create_SetNameError(false);
+            Create_SetCreateError(false);
+            Load_LoadBtn.IsEnabled = false;
+
+            windows.Add(CreateProjectBtn, gridCreateProject);
+            windows.Add(LoadProjectBtn, gridLoadProject);
+
+            ToggleVisibility_AllOff();
+
+            foreach (KeyValuePair<Button, Grid> kVP in windows)
+                kVP.Key.Click += OnKeyClick;
+
+            Create_PathTxtBox.IsReadOnly = true;
         }
+
+        private void OnKeyClick(object sender, RoutedEventArgs e)
+        {
+            // Which button?
+            Button button = (Button)sender;
+
+            // Which grid?
+            Grid grid = windows[button]; // TODO: FailsafeCheck
+
+            // Visibilities
+            ToggleVisibility_AllOff();
+            ToggleVisibility(grid, true);
+        }
+
+        Dictionary<Button, Grid> windows = new Dictionary<Button, Grid>();
 
         bool nameError;
         bool createError;
 
-        private void CreateProjectBtn_onClick(object sender, RoutedEventArgs e)
+
+        private void CancelBtn_onClick(object sender, RoutedEventArgs e) => ToggleVisibility_AllOff();
+
+        private void ToggleVisibility_AllOff()
         {
-            CreateProjectGrid_ToggleVisibility(true);
+            foreach (Grid g in windows.Values)
+                ToggleVisibility(g, false);
         }
 
-
-        private void CreateProjectGrid_CancelBtn_onClick(object sender, RoutedEventArgs e)
+        private void ToggleVisibility(Grid grid, bool on)
         {
-            CreateProjectGrid_ToggleVisibility(false);
+            grid.Visibility = on ? Visibility.Visible : Visibility.Hidden;
         }
 
-        private void BrowseBtn_Click(object sender, RoutedEventArgs e)
+        private void CreateBrowseBtn_Click(object sender, RoutedEventArgs e)
         {
             string? res = GetFolderFromDialog();
             if (res == null)
@@ -51,10 +78,26 @@ namespace Editor
                 Console.WriteLine("Error: Parent Folder");
                 return;
             }
-            parentFolder = res;
+            create_ParentFolder = res;
 
-            PathTxtBox.Text = parentFolder;
-            CheckIfProjectPathExists();
+            Create_PathTxtBox.Text = create_ParentFolder;
+            Create_CheckIfProjectPathExists();
+        }
+
+        private void LoadBrowseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string? res = GetFolderFromDialogue_SAE();
+
+            if (res == null)
+            {
+                Console.WriteLine("Error: No Parent Folder To SAE File");
+                return;
+            }
+
+            load_ProjectPath = res;
+            Load_PathTxtBox.Text = load_ProjectPath;
+
+            Load_LoadBtn.IsEnabled = true;
         }
 
         private string? GetFolderFromDialog()
@@ -66,19 +109,42 @@ namespace Editor
 
             if (folderDialog.ShowDialog() == true)
             {
-                return parentFolder = folderDialog.FolderName;
+                return create_ParentFolder = folderDialog.FolderName;
+            }
+
+            return null;
+        }
+
+        private string? GetFolderFromDialogue_SAE()
+        {
+            var fileDialog = new OpenFileDialog
+            {
+                Filter = "SAE Project | *.sae"  
+
+                // Set options here
+            };
+
+            if (fileDialog.ShowDialog() == true)
+            {
+                string pathToFile = fileDialog.FileName;
+                DirectoryInfo? parentFolderInfo = Directory.GetParent(pathToFile);
+                if (parentFolderInfo == null)
+                    throw new Exception("WTF");
+
+                return parentFolderInfo.FullName;
             }
 
             return null;
         }
 
         /// <summary>
-        /// To create a folder with this name inside the <see cref="parentFolder"/>
+        /// To create a folder with this name inside the <see cref="create_ParentFolder"/>
         /// </summary>
         string projectName = "";
-        string parentFolder = "";
+        string create_ParentFolder = "";
+        string load_ProjectPath = "";
         // Commbine 
-        string projectPath => System.IO.Path.Combine(parentFolder, projectName);
+        string create_projectPath => System.IO.Path.Combine(create_ParentFolder, projectName);
 
         private void NameTxtBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -89,29 +155,29 @@ namespace Editor
             }
 
             bool needsError = !IsValidFolderName(projectName);
-            SetNameError(needsError);
-            CheckIfProjectPathExists();
+            Create_SetNameError(needsError);
+            Create_CheckIfProjectPathExists();
         }
 
-        private void CheckIfProjectPathExists()
+        private void Create_CheckIfProjectPathExists()
         {
-            bool showProjectError = Directory.Exists(projectPath);
-            SetCreateError(showProjectError);
+            bool showProjectError = Directory.Exists(create_projectPath);
+            Create_SetCreateError(showProjectError);
         }
 
         // 2024 says sorry for multiple functions doing the same thing ^_^
-        private void SetCreateError(bool on)
+        private void Create_SetCreateError(bool on)
         {
             createError = on;
-            CreateErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
-
+            Create_CreateErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+            
             ValidateCreateBtn();
         }
 
-        private void SetNameError(bool on)
+        private void Create_SetNameError(bool on)
         {
             nameError = on;
-            NameErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+            Create_NameErrorTxt.Visibility = on ? Visibility.Visible : Visibility.Hidden;
 
             ValidateCreateBtn();
         }
@@ -119,14 +185,9 @@ namespace Editor
         private void ValidateCreateBtn()
         {
             bool hasErrors = nameError || createError;
-            bool hasPath = projectName != "" && parentFolder != "";
+            bool hasPath = projectName != "" && create_ParentFolder != "";
 
-            CreateBtn.IsEnabled = !hasErrors && hasPath;
-        }
-
-        private void CreateProjectGrid_ToggleVisibility(bool on)
-        {
-            CreateProjectGrid.Visibility = on ? Visibility.Visible : Visibility.Hidden;
+            Create_CreateBtn.IsEnabled = !hasErrors && hasPath;
         }
 
         private bool IsValidFolderName(string projectName)
@@ -145,7 +206,7 @@ namespace Editor
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
         {
             // Create (check?)
-            DirectoryInfo directoryInfo = Directory.CreateDirectory(projectPath);
+            DirectoryInfo directoryInfo = Directory.CreateDirectory(create_projectPath);
 
             // TODO: Create any necessary files
             string fullPathToParentFolder = directoryInfo.FullName;
@@ -157,6 +218,18 @@ namespace Editor
             FileStream fs = File.Create(fullPathToFile);
 
             // All done?
+            TransitionToEditorViewPort(create_projectPath);
+        }
+        private void LoadBtn_Click(object sender, RoutedEventArgs e)
+        {
+            TransitionToEditorViewPort(load_ProjectPath);
+        }
+
+        private void TransitionToEditorViewPort(string projectFolder)
+        {
+            Console.WriteLine($"Transitioning To Viewport... for {projectFolder}");
+            // HIDE PROJECT CREATE/SELECT
+            // LOAD VIEWPORT
             throw new NotImplementedException("TODO: IMPLEMENT TRANSITION TO VIEWPORT!");
         }
     }
